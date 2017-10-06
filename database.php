@@ -69,6 +69,20 @@ class DatabaseLayer
         $this->exec($sql);
     }
 
+    public function getLessonsForUser($user) {
+        $sql = "";
+        $this->exec($sql);
+    }
+
+    public function getScheduleCourse($id_course) {
+        $sql = "
+        SELECT c.id_courses, c.title, c.description, u.name, c.start_date, c.end_date
+        FROM courses AS c, users AS u
+        WHERE c.id_user_lecturer = u.id_user
+        AND c.id_courses = $id_course";
+        $this->exec($sql);
+    }
+
     public function isUserExist($login)
     {
         $db = new DbConnect();
