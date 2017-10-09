@@ -2,7 +2,7 @@
     $servername = "localhost"; // sql сервер
     $username = "root"; // пользователь
     $password = ""; // пароль
-    $dbname = "schedulesecondstep"; // имя базы данных chat
+    $dbname = "raspisanie"; // имя базы данных chat
 	try{
 		$db = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
 		//echo "Connected";

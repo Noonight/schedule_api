@@ -8,7 +8,8 @@ class DatabaseLayer
     {
     }
 
-    function exec($sql) {
+    function exec($sql)
+    {
         try {
             $db = new DbConnect();
             $query = $db->getDb()->prepare($sql);
@@ -25,11 +26,12 @@ class DatabaseLayer
                 throw new PDOException('No records found.');
             }
         } catch (PDOException $e) {
-            echo '{"error":{"text":'. $e->getMessage() .'}}';
+            echo '{"error":{"text":' . $e->getMessage() . '}}';
         }
     }
 
-    public function getUser($id_user) {
+    public function getUser($id_user)
+    {
         $sql = "SELECT * FROM users WHERE id_user = $id_user limit 1";
         $this->exec($sql);
     }
@@ -40,7 +42,8 @@ class DatabaseLayer
         $this->exec($sql);
     }
 
-    public function getUserType($id_user_type) {
+    public function getUserType($id_user_type)
+    {
         $sql = "SELECT * FROM users_type WHERE id_user_type = $id_user_type limit 1";
         $this->exec($sql);
     }
@@ -69,12 +72,49 @@ class DatabaseLayer
         $this->exec($sql);
     }
 
-    public function getLessonsForUser($user) {
-        $sql = "";
+    public function getCourseForUser($user)
+    {
+        // id_course, title, description, startdate, enddate, id_user_lecturer
+        //  , id_user, name, id_user_type, id_course
+        /*$sql = "SELECT *
+                FROM courses,
+                  (SELECT users.id_user, users.name, users.id_user_type, listeners.id_courses
+                  FROM users INNER JOIN listeners
+                  ON users.id_user = listeners.id_user
+                  WHERE users.id_user = $user
+                  ORDER BY listeners.id_courses) AS tab
+                WHERE tab.id_courses = courses.id_courses";*/
+        $sql = "SELECT c.title, c.description, c.start_date, c.end_date, usv.name
+                FROM courses AS c,
+                  (SELECT users.id_user, users.name, users.id_user_type, listeners.id_courses
+                  FROM users INNER JOIN listeners
+                  ON users.id_user = listeners.id_user
+                  WHERE users.id_user = $user
+                  ORDER BY listeners.id_courses) AS tab,
+                  (SELECT us.id_user, us.name
+                  FROM users AS us) AS usv
+                  WHERE tab.id_courses = c.id_courses
+                  AND usv.id_user = c.id_user_lecturer";
         $this->exec($sql);
     }
 
-    public function getScheduleCourse($id_course) {
+    public function getLessonsForUser() {
+        $sql = "SELECT l.id_lesson, l.id_courses, l.start_time, l.day, l.auditory, l.type
+                FROM lessons as l,
+                  (SELECT tab.id_courses
+                  FROM courses,
+                    (SELECT listeners.id_courses
+                    FROM users INNER JOIN listeners
+                    ON users.id_user = listeners.id_user
+                    WHERE users.id_user = 1
+                    ORDER BY listeners.id_courses) AS tab
+                  WHERE tab.id_courses = courses.id_courses) AS tg
+                WHERE l.id_courses = tg.id_courses";
+        $this->exec($sql);
+    }
+
+    public function getScheduleCourse($id_course)
+    {
         $sql = "
         SELECT c.id_courses, c.title, c.description, u.name, c.start_date, c.end_date
         FROM courses AS c, users AS u
